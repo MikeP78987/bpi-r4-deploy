@@ -22,7 +22,7 @@ Link: https://github.com/openwrt/mt76/pull/954
 
 --- a/mt7996/eeprom.c
 +++ b/mt7996/eeprom.c
-@@ -93,6 +93,36 @@ mt7996_eeprom_parse_stream(const u8 *eep
+@@ -93,6 +93,41 @@ mt7996_eeprom_parse_stream(const u8 *eep
  	}
  }
  
@@ -32,6 +32,11 @@ Link: https://github.com/openwrt/mt76/pull/954
 +	u8 *eeprom = dev->mt76.eeprom.data;
 +	int i;
 +	bool zeros_detected = false;
++
++	dev_info(dev->mt76.dev,
++		 "tx_power_fixup: ENTERED eeprom[2G]=0x%02x eeprom[5G]=0x%02x eeprom[6G]=0x%02x def[2G]=0x%02x def[5G]=0x%02x def[6G]=0x%02x\n",
++		 eeprom[MT_EE_TX0_POWER_2G], eeprom[MT_EE_TX0_POWER_5G], eeprom[MT_EE_TX0_POWER_6G],
++		 def[MT_EE_TX0_POWER_2G], def[MT_EE_TX0_POWER_5G], def[MT_EE_TX0_POWER_6G]);
 +
 +	if (!eeprom[MT_EE_TX0_POWER_2G]) {
 +		eeprom[MT_EE_TX0_POWER_2G] = def[MT_EE_TX0_POWER_2G];
@@ -59,10 +64,11 @@ Link: https://github.com/openwrt/mt76/pull/954
  static bool mt7996_eeprom_variant_valid(struct mt7996_dev *dev, const u8 *def)
  {
  #define FEM_INT	0
-@@ -148,6 +178,8 @@ mt7996_eeprom_check_or_use_default(struc
+@@ -148,6 +178,9 @@ mt7996_eeprom_check_or_use_default(struc
  		goto out;
  	}
  
++	dev_info(dev->mt76.dev, "tx_power_fixup: call site reached, use_default=%d\n", use_default);
 +	mt7996_eeprom_fixup_tx_power(dev, fw->data);
 +
  	if (!use_default && mt7996_eeprom_variant_valid(dev, fw->data))
